@@ -59,7 +59,17 @@ RUN apt-get update \
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf \
    && sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf \
    && sed -i 's/worker_connections  1024/worker_connections  10240/' /etc/nginx/nginx.conf \
+   && sed -i '/keepalive_timeout.*/a \ \ \ \ client_max_body_size 16384M;' /etc/nginx/nginx.conf \
+   && sed -i '/keepalive_timeout.*/a \ \ \ \ client_body_timeout 7200s;' /etc/nginx/nginx.conf \
    && mkdir -p '/etc/nginx/dhparam'
+
+# Increase client body size for Nextcloud
+RUN { \
+      echo 'server_tokens off;'; \
+      echo 'client_max_body_size 16384M;'; \
+      echo 'client_body_timeout 7200s;'; \
+      
+    } > /etc/nginx/conf.d/my_proxy.conf
 
 # Install Forego + docker-gen
 COPY --from=forego /usr/local/bin/forego /usr/local/bin/forego
